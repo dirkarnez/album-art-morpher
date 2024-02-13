@@ -18,19 +18,66 @@
         })
       })()
 
+      function isSquare(image) {
+        return image.width == image.height;
+      }
+
+      function isPortrait(image) {
+        return image.width < image.height;
+      }
+      function isLandscape (image) {
+        return image.width > image.height;
+      }
+
+      function getResizeParametersForBackground(image) {
+        if (isSquare(image)) {
+          return {width: 600, height: 600};
+        };
+
+        if (isPortrait(image)) {
+          return { width: 600, preserveAspectRatio: true};
+        };
+
+        if (isLandscape(image)) {
+          return { height: 600, preserveAspectRatio: true};
+        };
+
+      }
+
+      function getResizeParametersForSourceImage(image) {
+        if (isSquare(image)) {
+          return {width: 600, height: 600};
+        };
+
+        if (isPortrait(image)) {
+          return { height: 600, preserveAspectRatio: true};
+        };
+
+        if (isLandscape(image)) {
+          return { width: 600, preserveAspectRatio: true};
+        };
+
+      }
+
       async function process(imagejsImage) {
         let image = await imagejsImage.load(document.getElementById('color').src);
 	
-        var output = image
-        .rotate(30, {
-        	interpolation: "bilinear" // "bilinear" is apparently better than "nearestNeighbor"
-        })
-        .crop({
-          x: 150,
-          y: 150,
-          width : image.width / 2,
-          height: image.height / 2
-        })
+        var enlargedImage = image
+          .resize(getResizeParametersForBackground(image));
+          
+        var background = enlargedImage
+          .crop({width: 600, height: 600, x: (enlargedImage.width / 2) - 300, y: (enlargedImage.height / 2) - 300 })
+          .gaussianFilter({radius: 30});
+
+        var overlay = image
+          .resize(getResizeParametersForSourceImage(image));
+          
+        var output = background
+          .insert(overlay, 
+          {
+            x: 300 - (overlay.width / 2), 
+            y: 300 - (overlay.height / 2)
+          });
 
         document.getElementById('result').src = output.toDataURL();
       }
