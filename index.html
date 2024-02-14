@@ -5,6 +5,9 @@
       src="https://www.lactame.com/github/image-js/image-js/3073b80c7d626196cb669f9d617f491a8338ca66/test/img/taxi/original.jpeg"
     />
     <img id="result" />
+    <br>
+    <input type="file" id="imageInput" accept="image/*">
+    <div id="container"></div>
 
     <script>
       (async () => {
@@ -13,10 +16,67 @@
         .then(async jsCode => {
           eval(jsCode); // imagejs is declared
           if (!!imagejs) {
-            await process(imagejs.Image)
+            await process(imagejs.Image);
+            setup(imagejs.Image);
           }
         })
-      })()
+      })();
+
+      function downloadFile(url, filename) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+      }
+
+      function setup(imagejsImage) {
+        const imageInput = document.getElementById('imageInput');
+    
+        imageInput.addEventListener('change', function(e) {
+          var file = e.target.files[0];
+          
+          if (file.type.match('image.*')) {
+            var reader = new FileReader();
+            
+            reader.onload = function(e) {
+              const container = document.getElementById('container');
+              container.innerHTML = "";
+                
+              var img = new Image();
+              container.appendChild(img);
+              
+              // TODO: have to revoke
+              img.src = URL.createObjectURL(new Blob([e.target.result]));
+              
+              img.onload = async function() {
+                // Perform actions with the selected image
+                console.log('Image selected:', img.src);
+                let image = await imagejsImage.load(e.target.result);
+                var enlargedImage = image
+                  .resize(getResizeParametersForBackground(image));
+                  
+                var background = enlargedImage
+                  .crop({width: 600, height: 600, x: (enlargedImage.width / 2) - 300, y: (enlargedImage.height / 2) - 300 })
+                  .gaussianFilter({radius: 30});
+
+                var overlay = image
+                  .resize(getResizeParametersForSourceImage(image));
+                  
+                var output = background
+                  .insert(overlay, 
+                  {
+                    x: 300 - (overlay.width / 2), 
+                    y: 300 - (overlay.height / 2)
+                  });
+
+                downloadFile(output.toDataURL('image/jpg'), "output.jpg");
+              };
+            };
+            
+            reader.readAsArrayBuffer(file);
+          }
+        });
+      }
 
       function isSquare(image) {
         return image.width == image.height;
