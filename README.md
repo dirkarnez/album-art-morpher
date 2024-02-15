@@ -11,3 +11,4 @@ To:
     - https://image-js.github.io/image-js/#imageresize
         - > preserve width/height ratio if only one of them is defined
 - background image and source image basically have opposite resize parameters.
+- for `toDataURL()`, `{ useCanvas: true }` is used for greater compression since it is intended for web
