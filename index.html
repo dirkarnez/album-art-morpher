@@ -53,14 +53,13 @@
                 console.log('Image selected:', img.src);
                 let image = await imagejsImage.load(e.target.result);
                 var enlargedImage = image
-                  .resize(getResizeParametersForBackground(image));
-                  
+                  .resize({...getResizeParametersForBackground(image), interpolation: "bilinear"});  // "bilinear" is apparently better than "nearestNeighbor"
                 var background = enlargedImage
                   .crop({width: 600, height: 600, x: (enlargedImage.width / 2) - 300, y: (enlargedImage.height / 2) - 300 })
                   .gaussianFilter({radius: 30});
 
                 var overlay = image
-                  .resize(getResizeParametersForSourceImage(image));
+                  .resize({...getResizeParametersForSourceImage(image), interpolation: "bilinear"});  // "bilinear" is apparently better than "nearestNeighbor"
                   
                 var output = background
                   .insert(overlay, 
@@ -123,14 +122,14 @@
         let image = await imagejsImage.load(document.getElementById('color').src);
 	
         var enlargedImage = image
-          .resize(getResizeParametersForBackground(image));
+          .resize({...getResizeParametersForBackground(image), interpolation: "bilinear"});  // "bilinear" is apparently better than "nearestNeighbor"
           
         var background = enlargedImage
           .crop({width: 600, height: 600, x: (enlargedImage.width / 2) - 300, y: (enlargedImage.height / 2) - 300 })
           .gaussianFilter({radius: 30});
 
         var overlay = image
-          .resize(getResizeParametersForSourceImage(image));
+          .resize({...getResizeParametersForSourceImage(image), interpolation: "bilinear"});  // "bilinear" is apparently better than "nearestNeighbor"
           
         var output = background
           .insert(overlay, 
